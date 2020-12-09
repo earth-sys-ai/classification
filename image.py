@@ -25,7 +25,7 @@ IMAGE_URLS = [
 
 SCOORD = [30.60, -97.14]
 ECOORD = [28.73, -92.46]
-ZOOM = 13
+ZOOM = 10
 
 print('Converting and merging radar tile images:')
 layer.downloadTiles(SCOORD, ECOORD, ZOOM, [polar.POLAR_URL], 'radar.png')

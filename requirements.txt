@@ -1,4 +1,0 @@
-earthengine-api
-progressbar2
-geemap
-pillow

@@ -28,15 +28,15 @@ def add_ratio_band(image):
   new_image = new_image.addBands(i_ratio)
   return new_image
 
-def add_difference_band(image):
-  new_image = ee.Image(image)
-  i_ratio = image.select("VV").subtract(image.select("VH"))
-  i_ratio = i_ratio.rename("VV-VH")
-  new_image = new_image.addBands(i_ratio)
-  return new_image
+# def add_difference_band(image):
+#   new_image = ee.Image(image)
+#   i_ratio = image.select("VV").subtract(image.select("VH"))
+#   i_ratio = i_ratio.rename("VV-VH")
+#   new_image = new_image.addBands(i_ratio)
+#   return new_image
 
 ic_vvvh = ic_vvvh.map(add_ratio_band)
-ic_vvvh = ic_vvvh.map(add_difference_band)
+# ic_vvvh = ic_vvvh.map(add_difference_band)
 
 ic_vvvh_desc = ic_vvvh.filter(ee.Filter.eq('orbitProperties_pass', 'DESCENDING'))
 ic_vvvh_asc = ic_vvvh.filter(ee.Filter.eq('orbitProperties_pass', 'ASCENDING'))
