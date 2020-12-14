@@ -1,6 +1,6 @@
 import layer
-print('Processing radar data with Earth Engine...')
 import polar
+from info import get_data
 
 # parameters
 IMAGE_URLS = [
@@ -23,12 +23,20 @@ IMAGE_URLS = [
     'https://stormscdn.ngs.noaa.gov/20170903a-rgb/'
 ]
 
-SCOORD = [30.60, -97.14]
-ECOORD = [28.73, -92.46]
-ZOOM = 10
+SCOORD, ECOORD, _, _ = get_data(2017, 'harvey')
+ZOOM = 8
+START = "2017-08-25"
+END = "2017-09-25"
+
+print(str(SCOORD) + " " + str(ECOORD))
+
+# print('Converting and merging radar tile images:')
+# layer.downloadTiles(SCOORD, ECOORD, ZOOM, [polar.get_tile(START, END)], 'radar.png')
+
+# print('\nConverting and merging visible tile images:')
+# layer.downloadTiles(SCOORD, ECOORD, ZOOM, IMAGE_URLS, 'visible.png')
+
 
 print('Converting and merging radar tile images:')
-layer.downloadTiles(SCOORD, ECOORD, ZOOM, [polar.POLAR_URL], 'radar.png')
-
-print('\nConverting and merging visible tile images:')
-layer.downloadTiles(SCOORD, ECOORD, ZOOM, IMAGE_URLS, 'visible.png')
+layer.downloadTiles(SCOORD, ECOORD, ZOOM, [polar.get_tile('2017-07-01', '2017-08-01')], 'pics/before.png')
+layer.downloadTiles(SCOORD, ECOORD, ZOOM, [polar.get_tile('2017-08-25', '2017-09-25')], 'pics/after.png')
