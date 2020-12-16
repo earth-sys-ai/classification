@@ -1,6 +1,6 @@
 import layer
 import polar
-from info import get_data
+import info 
 
 # parameters
 IMAGE_URLS = [
@@ -23,19 +23,13 @@ IMAGE_URLS = [
     'https://stormscdn.ngs.noaa.gov/20170903a-rgb/'
 ]
 
-SCOORD, ECOORD, _, _ = get_data(2017, 'harvey')
-ZOOM = 8
-START = "2017-08-25"
-END = "2017-09-25"
+SCOORD, ECOORD, _, _ = info.get_data(2017, 'harvey')
+ZOOM = 10
 
 print(str(SCOORD) + " " + str(ECOORD))
 
-# print('Converting and merging radar tile images:')
-# layer.downloadTiles(SCOORD, ECOORD, ZOOM, [polar.get_tile(START, END)], 'radar.png')
-
-# print('\nConverting and merging visible tile images:')
-# layer.downloadTiles(SCOORD, ECOORD, ZOOM, IMAGE_URLS, 'visible.png')
-
+print('\nConverting and merging visible tile images:')
+layer.downloadTiles(SCOORD, ECOORD, ZOOM, IMAGE_URLS, 'pics/visible.png')
 
 print('Converting and merging radar tile images:')
 layer.downloadTiles(SCOORD, ECOORD, ZOOM, [polar.get_tile('2017-07-01', '2017-08-01')], 'pics/before.png')

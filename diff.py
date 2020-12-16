@@ -6,9 +6,11 @@ Image.MAX_IMAGE_PIXELS = None
 FIRST = sys.argv[1]
 SECOND = sys.argv[2]
 OUT = sys.argv[3]
-FIL = 1
+MIN = 190
 
 # load and apply
-img1 = Image.open(FIRST).convert('L').filter(ImageFilter.MinFilter(FIL))
-img2 = Image.open(SECOND).convert('L').filter(ImageFilter.MinFilter(FIL))
-ImageChops.subtract(img2, img1).save(OUT)
+img1 = Image.open(FIRST).convert('L')
+img2 = Image.open(SECOND).convert('L')
+con = ImageChops.subtract(img1, img2)
+out = con.point(lambda p: (p >= MIN) * 255)
+out.filter(ImageFilter.FIND_EDGES).save(OUT)
