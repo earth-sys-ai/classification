@@ -1,7 +1,7 @@
 import math
 import sys
+import tqdm
 import requests
-import progressbar
 from PIL import Image
 from io import BytesIO
 
@@ -25,7 +25,7 @@ def getTileURL(lat, lon, zoom):
     return [xtile, ytile]
 
 # download all the tiles within the given coords
-def downloadTiles(scoord, ecoord, zoom, urls, file):
+def downloadTiles(scoord, ecoord, zoom, urls, file, pos):
     
     start = getTileURL(scoord[0], scoord[1], zoom)
     stop = getTileURL(ecoord[0], ecoord[1], zoom)
@@ -39,24 +39,24 @@ def downloadTiles(scoord, ecoord, zoom, urls, file):
     height = SIZE * (stop[1] - start[1])
 
     outp = Image.new('RGBA', (width, height))
-    bar = progressbar.ProgressBar(max_value = width * height)
+    with tqdm.tqdm(total = width * height, position = pos, desc = file) as bar:
 
-    total = 0
-    for xtile in range(start[0], stop[0]):
-        for ytile in range(start[1], stop[1]):
+        total = 0
+        for xtile in range(start[0], stop[0]):
+            for ytile in range(start[1], stop[1]):
 
-            imgs = downloadTile(xtile, ytile, zoom, urls)
+                imgs = downloadTile(xtile, ytile, zoom, urls)
 
-            for img in imgs:
-                if img != None:
-                    xoff = (xtile - start[0]) * SIZE
-                    yoff = (ytile - start[1]) * SIZE
+                for img in imgs:
+                    if img != None:
+                        xoff = (xtile - start[0]) * SIZE
+                        yoff = (ytile - start[1]) * SIZE
 
-                    outp.paste(img, (xoff, yoff), mask = img)
-                    img.close()
+                        outp.paste(img, (xoff, yoff), mask = img)
+                        img.close()
 
-            total += 1
-            bar.update(total * SIZE ** 2)
+                total += 1
+                bar.update(total * SIZE ** 2)
 
     outp.save(file)
 

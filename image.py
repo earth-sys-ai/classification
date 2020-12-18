@@ -1,6 +1,7 @@
 import layer
 import polar
-import info 
+import info
+import threading 
 
 # parameters
 IMAGE_URLS = [
@@ -24,13 +25,16 @@ IMAGE_URLS = [
 ]
 
 SCOORD, ECOORD, _, _ = info.get_data(2017, 'harvey')
-ZOOM = 10
+ZOOM = 8
+threads = []
 
-print(str(SCOORD) + " " + str(ECOORD))
+# print('\nConverting and merging visible tile images:')
+threads.append(threading.Thread(target = layer.downloadTiles, args = (SCOORD, ECOORD, ZOOM, IMAGE_URLS, 'pics/visible.png', 0)))
 
-print('\nConverting and merging visible tile images:')
-layer.downloadTiles(SCOORD, ECOORD, ZOOM, IMAGE_URLS, 'pics/visible.png')
+# print('Converting and merging radar tile images:')
+threads.append(threading.Thread(target = layer.downloadTiles, args = (SCOORD, ECOORD, ZOOM, [polar.get_tile('2017-07-01', '2017-08-01')], 'pics/before.png', 1)))
+threads.append(threading.Thread(target = layer.downloadTiles, args = (SCOORD, ECOORD, ZOOM, [polar.get_tile('2017-08-25', '2017-09-25')], 'pics/after.png', 2)))
 
-print('Converting and merging radar tile images:')
-layer.downloadTiles(SCOORD, ECOORD, ZOOM, [polar.get_tile('2017-07-01', '2017-08-01')], 'pics/before.png')
-layer.downloadTiles(SCOORD, ECOORD, ZOOM, [polar.get_tile('2017-08-25', '2017-09-25')], 'pics/after.png')
+# do the dew
+for t in threads:
+    t.start()

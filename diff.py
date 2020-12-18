@@ -6,7 +6,7 @@ Image.MAX_IMAGE_PIXELS = None
 FIRST = sys.argv[1]
 SECOND = sys.argv[2]
 OUT = sys.argv[3]
-MIN = 190
+MIN = 164
 
 # load and apply
 img1 = Image.open(FIRST).convert('L')
