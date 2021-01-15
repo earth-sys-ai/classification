@@ -9,8 +9,8 @@ headers = ({'User-Agent':
             'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36'})
 
 # get bbox and date range from name
-LAT_PAD = 2
-LON_PAD = 3
+LAT_PAD = 0.25
+LON_PAD = 0.75
 POS = 4
 
 # get code from name and year

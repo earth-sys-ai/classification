@@ -32,5 +32,6 @@ def get_tile(START, END):
 
   Map = geemap.Map()
   Map.addLayer(ic_vvvh_asc, ivp, "S1 [VH, VH, VH]")
+  Map.save('map.html')
 
   return Map.layers[-1].url[:-11]

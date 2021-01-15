@@ -37,9 +37,10 @@ def downloadTiles(scoord, ecoord, zoom, urls, file, pos):
 
     width = SIZE * (stop[0] - start[0])
     height = SIZE * (stop[1] - start[1])
+    tilecount = (stop[0] - start[0]) * (stop[1] - start[1])
 
     outp = Image.new('RGBA', (width, height))
-    with tqdm.tqdm(total = width * height, position = pos, desc = file) as bar:
+    with tqdm.tqdm(total = tilecount, position = pos, desc = file) as bar:
 
         total = 0
         for xtile in range(start[0], stop[0]):
@@ -56,7 +57,7 @@ def downloadTiles(scoord, ecoord, zoom, urls, file, pos):
                         img.close()
 
                 total += 1
-                bar.update(total * SIZE ** 2)
+                bar.update(total)
 
     outp.save(file)
 
