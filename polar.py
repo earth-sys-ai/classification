@@ -1,37 +1,62 @@
-import geemap
-import ee
-ee.Initialize()
+import datetime
+from sentinelsat import SentinelAPI, read_geojson, geojson_to_wkt
+from spatialist import vector
+import shutil
+import os
+import pyroSAR
+# import numpy as np
+# from PIL import Image
+# from osgeo import gdal
+from pyroSAR.snap import geocode
+import sys
 
-def get_tile(START, END):
-  ivp = {"opacity":1,"bands":["VH","VH","VH"],"min":-20,"max":-5,"gamma":5};
-  date_start = ee.Date(START)
-  date_end = ee.Date(END)
+# authorize api
+with open('secrets', 'r') as file:
+    raw = file.readlines()
+api = SentinelAPI(raw[0].strip(), raw[1].strip())
 
-  def img_map(image):
-    edge = image.lt(-50.0)
-    maskedImage = image.mask().And(edge.Not())
-    return image.updateMask(maskedImage)
 
-  ic_vvvh = (ee.ImageCollection('COPERNICUS/S1_GRD')
-          .filterDate(date_start,date_end)
-          .filterMetadata("transmitterReceiverPolarisation","equals",["VV","VH"])
-          .filter(ee.Filter.eq('instrumentMode', 'IW'))
-          .map(img_map))
+# start date, end date, polygon, outfile -> geotiff
+def get_tile(START, END, gjson, out):
 
-  def add_ratio_band(image):
-    new_image = ee.Image(image)
-    i_ratio = image.select("VV").divide(image.select("VH"))
-    i_ratio = i_ratio.rename("VV/VH")
-    new_image = new_image.addBands(i_ratio)
-    return new_image
+    # download raw data
+    footprint = geojson_to_wkt(read_geojson(gjson))
+    products = api.query(footprint,
+                         ingestiondate=(START, END),
+                         platformname='Sentinel-1',
+                         producttype='GRD',
+                         sensoroperationalmode='IW',
+                         orbitdirection='ASCENDING',
+                         polarisationmode='VH')
+    pmd = api.download_all(products, directory_path='./temp/')
+    fname = list(pmd[0].values())[0]['path']
 
-  ic_vvvh = ic_vvvh.map(add_ratio_band)
+    # unpack and ingest
+    scene = pyroSAR.identify(fname)
+    scene.unpack('./temp/', overwrite=True)
 
-  ic_vvvh_desc = ic_vvvh.filter(ee.Filter.eq('orbitProperties_pass', 'DESCENDING'))
-  ic_vvvh_asc = ic_vvvh.filter(ee.Filter.eq('orbitProperties_pass', 'ASCENDING'))
+    # geocode
+    shp = vector.Vector(filename=gjson)
+    geocode(infile=scene, outdir='./temp/', tr=int(sys.argv[3]), scaling='db',
+            removeS1ThermalNoise=True, terrainFlattening=False, allow_RES_OSV=True, speckleFilter='Refined Lee', shapefile=shp)
 
-  Map = geemap.Map()
-  Map.addLayer(ic_vvvh_asc, ivp, "S1 [VH, VH, VH]")
-  Map.save('map.html')
+    # save image
+    smd = scene.scanMetadata()
+    iname = './temp/{}__{}___{}_{}_VH_NR_Orb_Cal_TC_dB.tif'.format(
+        smd['sensor'], smd['acquisition_mode'], smd['orbit'], smd['start'])
+    shutil.copy2(iname, out)
 
-  return Map.layers[-1].url[:-11]
+
+# before
+get_tile(datetime.datetime(2021, 2, 28), datetime.datetime(
+    2021, 3, 4), sys.argv[1], sys.argv[2])
+
+# after
+# get_tile(datetime.datetime(2020, 8, 28), datetime.datetime(2020, 9, 4))
+
+# convert to png`
+# ds = gdal.Open('./pics/S1A__IW___A_20210228T001841_VH_NR_Orb_Cal_TC_dB.tif', gdal.GA_ReadOnly)
+# band = ds.GetRasterBand(1).ReadAsArray()
+# band = np.interp(band, (np.amin(band), np.amax(band)), (0, 255)).astype('uint8')
+# img = Image.fromarray(band)
+# img.save('./pics/test.png')
