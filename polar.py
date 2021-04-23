@@ -19,7 +19,8 @@ api = SentinelAPI(raw[0].strip(), raw[1].strip())
 # start date, end date, polygon, outfile -> geotiff
 def get_tile(START, END, gjson, out):
 
-    # download raw data
+    # search database for matching archives
+    print('Querying database...')
     footprint = geojson_to_wkt(read_geojson(gjson))
     products = api.query(footprint,
                          ingestiondate=(START, END),
@@ -28,23 +29,32 @@ def get_tile(START, END, gjson, out):
                          sensoroperationalmode='IW',
                          orbitdirection='ASCENDING',
                          polarisationmode='VH')
+
+    # download archive
+    print('Downloading archive...')
     pmd = api.download_all(products, directory_path='./temp/')
     fname = list(pmd[0].values())[0]['path']
 
     # unpack and ingest
+    print('Unpacking archive...')
     scene = pyroSAR.identify(fname)
     scene.unpack('./temp/', overwrite=True)
 
     # geocode
+    print('Geocoding data...')
     shp = vector.Vector(filename=gjson)
-    geocode(infile=scene, outdir='./temp/', tr=int(sys.argv[3]), scaling='db',
-            removeS1ThermalNoise=True, terrainFlattening=False, allow_RES_OSV=True, speckleFilter='Refined Lee', shapefile=shp)
+    geocode(infile=scene, outdir='./temp/', tr=int(sys.argv[3]), scaling='db', removeS1ThermalNoise=True, demResamplingMethod='BISINC_21_POINT_INTERPOLATION',
+            terrainFlattening=True, allow_RES_OSV=True, speckleFilter='Refined Lee', shapefile=shp, cleanup=True)
 
     # save image
+    print('Copying image...')
     smd = scene.scanMetadata()
-    iname = './temp/{}__{}___{}_{}_VH_NR_Orb_Cal_TC_dB.tif'.format(
-        smd['sensor'], smd['acquisition_mode'], smd['orbit'], smd['start'])
+    iname = './temp/' + [file for file in os.listdir('./temp/') if '{}__{}___{}_{}_VH'.format(
+        smd['sensor'], smd['acquisition_mode'], smd['orbit'], smd['start']) in file][0]
     shutil.copy2(iname, out)
+
+    # done
+    print('Done.')
 
 
 # before
