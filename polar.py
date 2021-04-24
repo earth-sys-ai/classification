@@ -64,9 +64,3 @@ get_tile(datetime.datetime(2021, 2, 28), datetime.datetime(
 # after
 # get_tile(datetime.datetime(2020, 8, 28), datetime.datetime(2020, 9, 4))
 
-# convert to png`
-# ds = gdal.Open('./pics/S1A__IW___A_20210228T001841_VH_NR_Orb_Cal_TC_dB.tif', gdal.GA_ReadOnly)
-# band = ds.GetRasterBand(1).ReadAsArray()
-# band = np.interp(band, (np.amin(band), np.amax(band)), (0, 255)).astype('uint8')
-# img = Image.fromarray(band)
-# img.save('./pics/test.png')
