@@ -57,10 +57,5 @@ def get_tile(START, END, gjson, out):
     print('Done.')
 
 
-# before
-get_tile(datetime.datetime(2021, 2, 28), datetime.datetime(
-    2021, 3, 4), sys.argv[1], sys.argv[2])
-
 # after
 # get_tile(datetime.datetime(2020, 8, 28), datetime.datetime(2020, 9, 4))
-
