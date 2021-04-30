@@ -4,17 +4,13 @@ from spatialist import vector
 import shutil
 import os
 import pyroSAR
-# import numpy as np
-# from PIL import Image
-# from osgeo import gdal
 from pyroSAR.snap import geocode
 import sys
 
 # authorize api
 with open('secrets', 'r') as file:
     raw = file.readlines()
-api = SentinelAPI(raw[0].strip(), raw[1].strip())
-
+api = SentinelAPI(raw[0].strip(), raw[1].strip(), 'https://apihub.copernicus.eu/apihub')
 
 # start date, end date, polygon, outfile -> geotiff
 def get_tile(START, END, gjson, out):
@@ -33,7 +29,7 @@ def get_tile(START, END, gjson, out):
     # download archive
     print('Downloading archive...')
     pmd = api.download_all(products, directory_path='./temp/')
-    fname = list(pmd[0].values())[0]['path']
+    fname = './temp/' + list(pmd[0].values())[0]['title'] + '.zip'
 
     # unpack and ingest
     print('Unpacking archive...')
@@ -55,7 +51,3 @@ def get_tile(START, END, gjson, out):
 
     # done
     print('Done.')
-
-
-# after
-# get_tile(datetime.datetime(2020, 8, 28), datetime.datetime(2020, 9, 4))
