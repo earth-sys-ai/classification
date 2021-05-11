@@ -11,8 +11,12 @@ def find_difference(after, before, outname):
     ds2 = gdal.Open(before, gdal.GA_ReadOnly)
     band_b = ds2.GetRasterBand(1).ReadAsArray().astype('bool')
 
-    band_a = band_a[1:band_b.shape[0] + 1, 1:band_b.shape[1] + 1]
+    xsize = min(band_a.shape[0], band_b.shape[0])
+    ysize = min(band_a.shape[1], band_b.shape[1])
 
+    band_a = band_a[1:xsize, 1:ysize]
+    band_b = band_b[1:xsize, 1:ysize]
+    
     diff = band_a ^ band_b
     diff = morphology.binary_dilation(diff)
 
